@@ -5,7 +5,7 @@ import (
 	"net/http"
 	"os"
 
-	"go1fl-sprint6-final/internal/server"
+	"github.com/Yandex-Practicum/go1fl-sprint6-final/internal/server"
 )
 
 func main() {
@@ -15,6 +15,6 @@ func main() {
 
 	err := srv.Start()
 	if err != nil && err != http.ErrServerClosed {
-		logger.Fatalf("Ошибка: %v", err)
+		logger.Fatal(err)
 	}
 }

@@ -10,7 +10,7 @@ import (
 	"path/filepath"
 	"time"
 
-	"go1fl-sprint6-final/internal/service"
+	"github.com/Yandex-Practicum/go1fl-sprint6-final/internal/service"
 )
 
 func RootHandler(w http.ResponseWriter, r *http.Request) {
@@ -30,36 +30,28 @@ func RootHandler(w http.ResponseWriter, r *http.Request) {
 }
 
 func UploadHandler(w http.ResponseWriter, r *http.Request) {
-	if r.Method != http.MethodPost {
-		http.Error(w, "Ошибка", http.StatusMethodNotAllowed)
-		return
-	}
 
-	err := r.ParseMultipartForm(10 << 20)
-	if err != nil {
-		log.Printf("Ошибка: %v", err)
-		http.Error(w, "Ошибка", http.StatusInternalServerError)
-		return
-	}
+	r.ParseMultipartForm(10 << 20)
 
 	file, header, err := r.FormFile("myFile")
 	if err != nil {
-		log.Printf("Ошибка: %v", err)
-		http.Error(w, "Ошибка", http.StatusInternalServerError)
+		log.Fatal(err)
+		http.Error(w, "ошибка при получении файла", http.StatusBadRequest)
 		return
 	}
+
 	defer file.Close()
 
 	fileBytes, err := io.ReadAll(file)
 	if err != nil {
-		log.Printf("Ошибка: %v", err)
+		log.Fatal(err)
 		http.Error(w, "Ошибка", http.StatusInternalServerError)
 		return
 	}
 
 	converted, err := service.Convert(string(fileBytes))
 	if err != nil {
-		log.Printf("Ошибка: %v", err)
+		log.Fatal(err)
 		http.Error(w, "Ошибка", http.StatusInternalServerError)
 		return
 	}
@@ -70,12 +62,22 @@ func UploadHandler(w http.ResponseWriter, r *http.Request) {
 
 	err = os.WriteFile(fileName, []byte(converted), 0644)
 	if err != nil {
-		log.Printf("Ошибка: %v", err)
+		log.Fatal(err)
 		http.Error(w, "Ошибка", http.StatusInternalServerError)
 		return
 	}
 
-	w.Header().Set("Content-Type", "text/plain")
+	w.Header().Set("Content-Type", "text/html; charset=utf-8")
 	w.WriteHeader(http.StatusOK)
-	w.Write([]byte(converted))
+
+	pattern :=
+		`<!DOCTYPE html>
+  <html lang="ru"><head>
+  <meta charset="utf-8" />
+  <title>Ответ</title>
+  </head>
+<body>%s</body></html>`
+
+	result := fmt.Sprintf(pattern, converted)
+	w.Write([]byte(result))
 }

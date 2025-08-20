@@ -3,7 +3,7 @@ package service
 import (
 	"errors"
 
-	"go1fl-sprint6-final/pkg/morse"
+	"github.com/Yandex-Practicum/go1fl-sprint6-final/pkg/morse"
 )
 
 func Convert(input string) (string, error) {
@@ -21,7 +21,7 @@ func Convert(input string) (string, error) {
 func isMorse(s string) bool {
 
 	for _, c := range s {
-		if c != '.' && c != '-' {
+		if c != '.' && c != '-' && c != ' ' {
 			return false
 		}
 	}
